@@ -1,0 +1,29 @@
+Simulates FCFS and SSTF disk scheduling algorithms. See the attached file.
+
+Project Description
+In this project, you will write a program called disksched, which simulates FCFS and SSTF disk
+scheduling algorithms. The program will be invoked as follows:
+./disksched <inputfile> <outputfile> <algorithm> [limit]
+• <inputfile> is the name of a text file including the information about the disk requests to be
+scheduled. Each line of the input file will include information about a different disk request and it
+will have the following format:
+<arrival-time> <LBN> <request-size>
+For example, the following can be a sample input file:
+0.011413 657728 16
+0.011565 31244784 64
+0.011721 21868784 16
+0.016187 34567136 64
+0.018256 11813968 32
+0.020103 32234560 16
+Each line of the input file represents a different request, starts without any space, ends with a
+newline, and there is a single space (' ') in between each field in a line. Note that the example input
+file provided above is just provided for illustration purposes. Your program will be tested using
+input files containing much larger number of requests. Here is more information about the content
+of the input file:
+– All three fields are guaranteed to appear in the input file
+– <arrival-time> is a positive real number in seconds
+– <LBN> stands for the Logical Block Number and it is a positive integer representing the
+starting location of the disk request
+– <request-size> is a positive integer describing the number of sectors to be transferred
+– Requests are sorted by their arrival times in increasing order
+– Requests have different arrival times
