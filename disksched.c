@@ -61,6 +61,9 @@ int main(int argc,char* argv[])
         fclose(fin);
         return -1;
     }
+    int limit=INT_MAX;
+    if(argc==5)
+    limit=atoi(argv[4]);
     if(strcmp(argv[3],"FCFS")==0 || strcmp(argv[3],"fcfs")==0)
     {
         struct request cur_line;
@@ -75,9 +78,6 @@ int main(int argc,char* argv[])
         int temp=0;
         double wait=0;
         double service=0;
-        int limit=INT_MAX;
-        if(argc==5)
-        limit=atoi(argv[4]);
         int count=0;
         while(!feof(fin) && count<limit)
         {
@@ -99,9 +99,43 @@ int main(int argc,char* argv[])
             fprintf(fout,"%lf %lf %lf %d %d %d %.6f\n",cur_line.arrival,(cur_line.arrival+wait+service),wait,psn,cylinder,surface,(float)sector_offset);
         }
     }
-    else if(strcmp(argv[3],"SSTF")==0)
+    else if(strcmp(argv[3],"SSTF")==0 || strcmp(argv[3],"sstf")==0)
     {
-
+        int count=0;
+        double prev_arrival=0;
+        struct request cur_line;
+        if(argc!=5)
+        {
+            while(!feof(fin))//Count number of requests
+            {
+                fscanf(fin,"%lf %d %d",&cur_line.arrival,&cur_line.lbn,&cur_line.request_size);
+                if(prev_arrival==cur_line.arrival) continue;
+                else prev_arrival=cur_line.arrival;
+                count++;
+            }
+        }
+        fclose(fin);
+        fin=fopen(argv[1],"r");
+        if(!fin)
+        {
+            fprintf(stdout,"Could not open input file %s\n",argv[1]);
+            fflush(stdout);
+            return -1;
+        }
+        prev_arrival=0;
+        limit=(count>limit || limit==INT_MAX)?count:limit;
+        printf("Limit is %d\n",limit);
+        count=0;
+        struct request* requests=malloc(sizeof(struct request)*(limit));
+        while(count<limit)//Read in all requests at once
+        {
+            fscanf(fin,"%lf %d %d",&requests[count].arrival,&requests[count].lbn,&requests[count].request_size);
+            if(prev_arrival==requests[count].arrival) {count++;continue;}
+            else prev_arrival=requests[count].arrival;
+            count++;
+        }
+        //Now process requests[] using SSTF
+        free(requests);
     }
     else
     {
