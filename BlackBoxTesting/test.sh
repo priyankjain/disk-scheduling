@@ -37,35 +37,35 @@ else
     echo Fail--------------------------------------------------Fail
 fi
 
-# ./disksched input_file/in.txt student_out_sstf_1.txt sstf 1
+./disksched input_file/in.txt student_out_sstf_1.txt sstf 1
 
-# if diff -w student_out_sstf_1.txt correct_output/correct_output_sstf_1.txt; then
-#     echo Success-----------------------------------------------Success
-# else
-#     echo Fail--------------------------------------------------Fail
-# fi
+if diff -w student_out_sstf_1.txt correct_output/correct_output_sstf_1.txt; then
+    echo Success-----------------------------------------------Success
+else
+    echo Fail--------------------------------------------------Fail
+fi
 
-# ./disksched input_file/in.txt student_out_sstf_10.txt sstf 10
+./disksched input_file/in.txt student_out_sstf_10.txt sstf 10
 
-# if diff -w student_out_sstf_10.txt correct_output/correct_output_sstf_10.txt; then
-#     echo Success-----------------------------------------------Success
-# else
-#     echo Fail--------------------------------------------------Fail
-# fi
+if diff -w student_out_sstf_10.txt correct_output/correct_output_sstf_10.txt; then
+    echo Success-----------------------------------------------Success
+else
+    echo Fail--------------------------------------------------Fail
+fi
 
-# ./disksched input_file/in.txt student_out_sstf_100.txt sstf 100
+./disksched input_file/in.txt student_out_sstf_100.txt sstf 100
 
-# if diff -w student_out_sstf_100.txt correct_output/correct_output_sstf_100.txt; then
-#     echo Success-----------------------------------------------Success
-# else
-#     echo Fail--------------------------------------------------Fail
-# fi
+if diff -w student_out_sstf_100.txt correct_output/correct_output_sstf_100.txt; then
+    echo Success-----------------------------------------------Success
+else
+    echo Fail--------------------------------------------------Fail
+fi
 
-# ./disksched input_file/in.txt student_out_sstf_10000.txt sstf 10000
+./disksched input_file/in.txt student_out_sstf_10000.txt sstf 10000
 
-# if diff -w student_out_sstf_10000.txt correct_output/correct_output_sstf_10000.txt; then
-#     echo Success-----------------------------------------------Success
-# else
-#     echo Fail--------------------------------------------------Fail
-# fi
-# # 
+if diff -w student_out_sstf_10000.txt correct_output/correct_output_sstf_10000.txt; then
+    echo Success-----------------------------------------------Success
+else
+    echo Fail--------------------------------------------------Fail
+fi
+# 

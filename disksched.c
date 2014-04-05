@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<limits.h>
+#include<float.h>
 #define SECTORSPERTRACK 200
 #define TRACKSPERCYLINDER 8
 #define CYLINDERS 500000.0
@@ -18,6 +19,21 @@ struct request
     int lbn;
     int request_size;
 };
+struct allrequest
+{
+    double arrival;
+    int lbn;
+    int request_size;
+    int psn;
+    int cylinder;
+    int surface;
+    int offset;
+};
+double calculateSeekTime(int prevCylinder,int cylinder)
+{
+    if(prevCylinder==cylinder) return 0;
+    else return 0.000028*abs(prevCylinder-cylinder)+2;
+}
 double calculateServiceTime(int prevcylinder,double prevoffset,int cylinder,int offset,int request_size)
 {
     double seektime=0;
@@ -124,18 +140,76 @@ int main(int argc,char* argv[])
         }
         prev_arrival=0;
         limit=(count>limit || limit==INT_MAX)?count:limit;
-        printf("Limit is %d\n",limit);
         count=0;
-        struct request* requests=malloc(sizeof(struct request)*(limit));
+        struct allrequest* requests=malloc(sizeof(struct allrequest)*(limit));
+        int* processed=malloc(sizeof(int)*(limit));
         while(count<limit)//Read in all requests at once
         {
             fscanf(fin,"%lf %d %d",&requests[count].arrival,&requests[count].lbn,&requests[count].request_size);
             if(prev_arrival==requests[count].arrival) {count++;continue;}
             else prev_arrival=requests[count].arrival;
+            processed[count]=0;
+            requests[count].psn=requests[count].lbn*(LOGICALBLOCKSIZE/PHYSICALSECTORSIZE)+requests[count].request_size;
+            requests[count].cylinder=requests[count].psn/SECTORSPERTRACK/TRACKSPERCYLINDER;
+            int temp=requests[count].psn-requests[count].cylinder*SECTORSPERTRACK*TRACKSPERCYLINDER;
+            requests[count].surface=temp/SECTORSPERTRACK;
+            requests[count].offset=temp%SECTORSPERTRACK;
             count++;
         }
         //Now process requests[] using SSTF
+        int curcylinder=0;
+        double cursector_offset=200;
+        double temp=0;
+        double wait=0;
+        double service=0;
+        int no_processed=0;
+        int ptr=-1;
+        double time=0;
+        int candidate_index=0;
+        double seek=DBL_MAX;
+        while(no_processed<limit)//While all requests are not serviced
+        {
+            //First select a candidate request to be processed
+            if(time<requests[ptr+1].arrival)
+                time=requests[ptr+1].arrival;
+            if(no_processed==0)
+            {//Process the first request there and there
+                candidate_index=0;
+            }
+            else
+            {
+                int i;
+                candidate_index=ptr;
+                seek=DBL_MAX;
+                for(i=ptr+1;requests[i].arrival<=time && i<limit;i++)
+                {
+                    if(processed[i]==1) continue;
+                    temp=calculateSeekTime(curcylinder,requests[i].cylinder);
+                    if(temp<seek)
+                    {
+                        seek=temp;
+                        candidate_index=i;
+                    }
+                }
+            }
+            service=calculateServiceTime(curcylinder,cursector_offset,requests[candidate_index].cylinder,(SECTORSPERTRACK+requests[candidate_index].offset-requests[candidate_index].request_size)%SECTORSPERTRACK,requests[candidate_index].request_size);
+            curcylinder=requests[candidate_index].cylinder;
+            cursector_offset=requests[candidate_index].offset;
+            wait=time-requests[candidate_index].arrival;
+            time+=service;
+            fprintf(fout,"%.6f %.6f %.6f %d %d %d %.6f\n",requests[candidate_index].arrival,(requests[candidate_index].arrival+wait+service),wait,requests[candidate_index].psn,requests[candidate_index].cylinder,requests[candidate_index].surface,(float)requests[candidate_index].offset);
+            no_processed++;
+            processed[candidate_index]=1;
+            if(ptr+1==candidate_index)
+            {
+                while(processed[ptr+1]==1)
+                {
+                    ptr+=1;
+                }
+            }
+        }
         free(requests);
+        free(processed);
     }
     else
     {
